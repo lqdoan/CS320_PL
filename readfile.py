@@ -31,7 +31,3 @@ def readFile(fileName: str):
     
     f.close()
     return tokens
-    
-tmp = readFile("a.txt")
-for t in tmp:
-    print(t.name, t.lineNum)
