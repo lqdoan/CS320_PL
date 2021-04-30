@@ -37,7 +37,7 @@ def readFile(fileName: str):
     inSequnece = None
     i = 0
     while i < data.__len__():
-        if (data[i] == '\'' or data[i] =='\"') and not inSequnece:
+        if (data[i] == '\'' or data[i] =='\"') and not inSequnece and not name:
             inSequnece = data[i]
             name += data[i]
             i += 1
