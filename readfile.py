@@ -31,7 +31,6 @@ def printTokens(tokens: list, mode: int): #if mode = 1 or 2, display may have so
                 line.append(token.name)
             else: 
                 displayArr = token.name.split(sep = '\n')
-                print(displayArr)
                 for i in range (0, displayArr.__len__()):
                     line.append(displayArr[i])
                     if i != displayArr.__len__()-1:
@@ -47,7 +46,9 @@ def printTokens(tokens: list, mode: int): #if mode = 1 or 2, display may have so
                         display.append(line)
                         line = []
                 continue
-            line.append(token.inArray)
+            if token.inArray:
+                line.append("YES")
+            else: line.append("NO")
             line.append(token.type)
             line.append(token.lineNum)
             display.append(line)
