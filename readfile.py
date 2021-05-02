@@ -75,6 +75,36 @@ def readFile(fileName: str):
     i = 0
     tokenType = ""
     while i < data.__len__():
+        if data[i] == '.' and not name and not inSequnece:
+            tokens.append(Token(".", False, line, "STATEMENT SEPERATOR"))
+            i += 1
+            continue
+
+        if data[i] == '[' and name != "#":
+            if name:
+                tokens.append(Token(name, False, line))
+                name = ""
+            tokens.append(Token('[', False, line, "LEFT SQU.BRACKET"))
+            i += 1
+            continue
+
+        if data[i] == ']' and not name and not inSequnece:
+            tokens.append(Token("]", False, line, "RIGHT SQU.BRACKET"))
+            i += 1
+            continue
+
+        if data[i] == '(' and name != "#":
+            if name:
+                tokens.append(Token(name, False, line))
+                name = ""
+            tokens.append(Token('(', False, line, "LEFT PARENTHESE"))
+            i += 1
+            continue
+
+        if data[i] == ')' and not name and not inSequnece:
+            tokens.append(Token(")", False, line, "RIGHT PARENTHESE"))
+            i += 1
+            continue
         if (data[i] == '\'' or data[i] =='\"') and not inSequnece and not name:
             inSequnece = data[i]
             if inSequnece == '\'':
@@ -104,22 +134,30 @@ def readFile(fileName: str):
         if (data[i] == '#') and not name:
             if i + 1 < data.__len__():
                 if data[i+1] == '\'':
+                    sep = False
                     tokenType = "SYMBOL"
                     name += "#\'"
                     i += 2
                     while i < data.__len__():
                         name += data[i]
+                        if data[i] == '.': break
                         if data[i] != '\'': i += 1
                         else: break
                     if i >= data.__len__():
                         tokenType = "ERROR"
                     if i+1 < data.__len__():
-                        if data[i+1] != ' ' and data[i+1] != '\n':
+                        if data[i+1] == '.':
+                            sep = True
+                        elif data[i+1] != ' ' and data[i+1] != '\n' and data[i+1] != '.':
                             tokenType = "ERROR"
                         if data[i+1] == '\n': line += 1
 
                     if tokenType != "ERROR":
+                        #if sep: name = name[0:name.__len__()-1]
                         tokens.append(Token(name, False, line, tokenType))
+                        if sep: 
+                            tokens.append(Token('.', False, line, 'STATEMENT SEPERATOR'))
+                            i += 1
                         name = ""
                         inSequnece = None
                         tokenType = ""
@@ -135,12 +173,16 @@ def readFile(fileName: str):
                         if data[i-1] == '\n' or data[i-1] == ']': break
                     if data[i-1] == ']':
                         if i < data.__len__():
-                            if data[i] == ' ' or data[i] == '\n':
+                            if data[i] == ' ' or data[i] == '\n' or data[i] == '.':
                                 tokens.append(Token(name, False, line, "BYTE ARRAY"))
                                 name = name[2:name.__len__()-1]
                                 inspectArray(name, line, tokens, True)
                                 name = ""
                                 if data[i] == '\n': line += 1
+                                if data[i] == '.': 
+                                    tokens.append(Token('.', False, line, "STATEMENT SEPERATOR"))
+                                    i += 1
+                                    continue
                     if i > data.__len__() or data[i-1] == '\n':
                         subName = name
                         if data[i-1] == '\n':
@@ -157,6 +199,7 @@ def readFile(fileName: str):
                     bracketCount = 1
                     name += "#("
                     i += 2
+                    sep = False
                     while i < data.__len__():
                         name += data[i]
                         i += 1
@@ -166,20 +209,26 @@ def readFile(fileName: str):
                             i -= 1
                             name = name[0:name.__len__()-1]
                             break
-                        if bracketCount == 0: break
+                        if bracketCount == 0: 
+                            break
                     tokenType = "CONSTANT ARRAY"
                     if bracketCount != 0:
                         tokenType = ""
                     if i < data.__len__():
-                        if data[i] != ' ' and data[i] != '\n':
+                        if data[i] != ' ' and data[i] != '\n' and data[i] != '.':
                             tokenType = ""
-                    if tokenType:
-                        if data [i] == '\n': line += 1
+                        elif data[i] == '.':      
+                            sep = True
+                    if tokenType:             
                         tokens.append(Token(name, False, line, tokenType))
-                        name = name[2:name.__len__()-1]
+                        if i < data.__len__():
+                            if data [i] == '\n': line += 1
+                        name = name[2:name.__len__()-1]    
                         inspectArray(name, line, tokens)
                         name = ""
                         tokenType = ""
+                        if sep:
+                            tokens.append(Token(".", False, line, 'STATEMENT SEPERATE'))
                         i += 1
                     continue
                 
@@ -187,12 +236,30 @@ def readFile(fileName: str):
             name += data[i]
         else:
             if name:
+                tmpArr = []
+                while name[name.__len__()-1] == '.' or name[name.__len__()-1] == ')' or name[name.__len__()-1] == ']':
+                    tmpArr.append(name[name.__len__()-1])
+                    name = name[0:name.__len__()-1]
+                if '.' in name:
+                    tmp = name.split(sep = '.')
+                    if tmp.__len__() == 2:
+                        if representsInt(tmp[0]) and representsInt(tmp[1]):
+                            tokens.append(Token(name, False, line, "FLOAT"))
+                            for t in reversed(tmpArr):
+                                tokens.append(Token(t, False, line,))
+                            name = ""
+                            continue
                 if ' ' in name:
                     snArr = name.split(sep = ' ')
                     for sn in snArr:
                         if sn:
                             tokens.append(Token(sn, False, line))
-                else: tokens.append(Token(name, False, line))
+                    for t in reversed(tmpArr):
+                                tokens.append(Token(t, False, line,))
+                else: 
+                    tokens.append(Token(name, False, line))
+                    for t in reversed(tmpArr):
+                                tokens.append(Token(t, False, line,))
                 name = ""
                 tokenType = ""
                 if inSequnece: inSequnece = None
@@ -201,12 +268,30 @@ def readFile(fileName: str):
         i += 1
 
     if name:
+        tmpArr = []
+        while name[name.__len__()-1] == '.' or name[name.__len__()-1] == ')' or name[name.__len__()-1] == ']':
+            tmpArr.append(name[name.__len__()-1])
+            name = name[0:name.__len__()-1]
+        if '.' in name:
+            tmp = name.split(sep = '.')
+            if tmp.__len__() == 2:
+                if representsInt(tmp[0]) and representsInt(tmp[1]):
+                    tokens.append(Token(name, False, line, "FLOAT"))
+                    for t in reversed(tmpArr):
+                        tokens.append(Token(t, False, line,))
+                    name = ""
+                    return 
         if ' ' in name:
             snArr = name.split(sep = ' ')
             for sn in snArr:
                 if sn:
                     tokens.append(Token(sn, False, line))
-        else: tokens.append(Token(name, False, line))
+            for t in reversed(tmpArr):
+                tokens.append(Token(t, False, line,))
+        else: 
+            tokens.append(Token(name, False, line))
+            for t in reversed(tmpArr):
+                tokens.append(Token(t, False, line,))
     
     f.close()
     return tokens
@@ -302,7 +387,7 @@ def representsInt(s: str):
     except ValueError:
         return False
 
-tokens = readFile("a.txt")
+tokens = readFile("a3.txt")
 printTokens(tokens, 2)
 
 
