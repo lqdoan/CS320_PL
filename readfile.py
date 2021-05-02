@@ -6,6 +6,7 @@ class Token:
         self.type = tokenType
 
 def printTokens(tokens: list, mode: int): #if mode = 1 or 2, display may have some bugs when a token has newline in its name
+    print("Note: Byte error occurs when an element in byte array is not an interger.\n")
     if mode == 1:
         display = [["NAME", "TYPE", "LINE"]]
         line = []
@@ -16,7 +17,7 @@ def printTokens(tokens: list, mode: int): #if mode = 1 or 2, display may have so
             display.append(line)
             line = []
         for line in display:
-            print('{:>40} {:>30} {:>30}'.format(*line))
+            print('{:>50} {:>30} {:>30}'.format(*line))
     elif mode == 0:
         for token in tokens:
             print("NAME:", token.name)
@@ -34,13 +35,16 @@ def printTokens(tokens: list, mode: int): #if mode = 1 or 2, display may have so
                 for i in range (0, displayArr.__len__()):
                     line.append(displayArr[i])
                     if i != displayArr.__len__()-1:
-                        line.append("")
-                        line.append("")
-                        line.append("")
+                        line.append("x")
+                        line.append("x")
+                        line.append("x")
                         display.append(line)
                         line = []
                     else:
-                        line.append(token.inArray)
+                        if token.inArray:
+                            line.append("YES")
+                        else:
+                            line.append("NO")
                         line.append(token.type)
                         line.append(token.lineNum)
                         display.append(line)
@@ -54,7 +58,7 @@ def printTokens(tokens: list, mode: int): #if mode = 1 or 2, display may have so
             display.append(line)
             line = []
         for line in display:
-            print('{:>40} {:>20} {:>20} {:>20}'.format(*line))
+            print('{:>50} {:>20} {:>20} {:>20}'.format(*line))
 
 def readFile(fileName: str):
     tokens = []
@@ -88,6 +92,7 @@ def readFile(fileName: str):
             if i+1 < data.__len__():
                 if data[i+1] != ' ' and data[i+1] != '\n':
                     tokenType = "ERROR"
+                if data[i+1] == '\n': line += 1
             if tokenType != "ERROR":
                 tokens.append(Token(name, False, line, tokenType))
                 name = ""
@@ -111,6 +116,8 @@ def readFile(fileName: str):
                     if i+1 < data.__len__():
                         if data[i+1] != ' ' and data[i+1] != '\n':
                             tokenType = "ERROR"
+                        if data[i+1] == '\n': line += 1
+
                     if tokenType != "ERROR":
                         tokens.append(Token(name, False, line, tokenType))
                         name = ""
@@ -118,6 +125,33 @@ def readFile(fileName: str):
                         tokenType = ""
                     i += 1
                     continue 
+
+                elif data[i+1] == '[':
+                    name += '#['
+                    i += 2
+                    while i < data.__len__():
+                        name += data[i]
+                        i += 1
+                        if data[i-1] == '\n' or data[i-1] == ']': break
+                    if data[i-1] == ']':
+                        if i < data.__len__():
+                            if data[i] == ' ' or data[i] == '\n':
+                                tokens.append(Token(name, False, line, "BYTE ARRAY"))
+                                name = name[2:name.__len__()-1]
+                                inspectArray(name, line, tokens, True)
+                                name = ""
+                                if data[i] == '\n': line += 1
+                    if i > data.__len__() or data[i-1] == '\n':
+                        subName = name
+                        if data[i-1] == '\n':
+                            subName = name[0:name.__len__()-1]
+                        snArr = subName.split(sep = ' ')
+                        for sn in snArr:
+                            if sn:
+                                tokens.append(Token(sn, False, line))
+                        if data[i-1] == '\n': line += 1
+                        name = ""
+                    continue
 
                 elif data[i+1] == '(':
                     bracketCount = 1
@@ -128,37 +162,37 @@ def readFile(fileName: str):
                         i += 1
                         if data[i-1] == '(': bracketCount += 1
                         if data[i-1] == ')': bracketCount -= 1 
-                        if data[i-1] == '\n': break
+                        if data[i-1] == '\n': 
+                            i -= 1
+                            name = name[0:name.__len__()-1]
+                            break
                         if bracketCount == 0: break
                     tokenType = "CONSTANT ARRAY"
                     if bracketCount != 0:
-                        tokenType = "ERROR"
+                        tokenType = ""
                     if i < data.__len__():
                         if data[i] != ' ' and data[i] != '\n':
-                            tokenType = "ERROR"
-                    if tokenType != "ERROR":
+                            tokenType = ""
+                    if tokenType:
+                        if data [i] == '\n': line += 1
                         tokens.append(Token(name, False, line, tokenType))
                         name = name[2:name.__len__()-1]
-                        #subNames = []
                         inspectArray(name, line, tokens)
-                        #for sn in subNames:
-                            #tokens.append(Token(sn, True, line))
                         name = ""
                         tokenType = ""
                         i += 1
                     continue
                 
-                elif data[i+1] == '[':
-                    while i < data.__len__():
-                        name += data[i]
-                        i += 1
-
-
         if data[i] != ' ' and data[i] != '\n':
             name += data[i]
         else:
             if name:
-                tokens.append(Token(name, False, line, tokenType))
+                if ' ' in name:
+                    snArr = name.split(sep = ' ')
+                    for sn in snArr:
+                        if sn:
+                            tokens.append(Token(sn, False, line))
+                else: tokens.append(Token(name, False, line))
                 name = ""
                 tokenType = ""
                 if inSequnece: inSequnece = None
@@ -167,18 +201,27 @@ def readFile(fileName: str):
         i += 1
 
     if name:
-        tokens.append(Token(name, False, line))
+        if ' ' in name:
+            snArr = name.split(sep = ' ')
+            for sn in snArr:
+                if sn:
+                    tokens.append(Token(sn, False, line))
+        else: tokens.append(Token(name, False, line))
     
     f.close()
     return tokens
 
-def inspectArray(array: str, line: int, ret: list):
+def inspectArray(array: str, line: int, ret: list, inByteArr = False):
     word = ""
     inSequnece = None
     i = 0
     bracketCount = 0
     while i < array.__len__():
-        if array[i] == '\'' and not inSequnece and not word:
+        if array[i] == '#' and not inByteArr:
+            word += '#'
+            i += 1
+            continue
+        if array[i] == '\'' and not inSequnece and (not word or word == '#') and not inByteArr:
             inSequnece = array[i]
             word += array[i]
             i += 1
@@ -186,14 +229,33 @@ def inspectArray(array: str, line: int, ret: list):
                 word += array[i]
                 i += 1
                 if array[i-1] == inSequnece: break
-            #ret.append(word)
-            ret.append(Token(word, True, line, "CONSTANT STRING"))
+            if word[0] != '#':
+                ret.append(Token(word, True, line, "STRING"))
+            else: ret.append(Token(word, True, line, "SYMBOL"))
             word = ""
             inSequnece = None
             i += 1
             continue
-        
-        if array[i] == '(' and not word:
+
+        if array[i] == '[' and (not word or word[0] == '#') and not inByteArr:
+            tokenType = "BYTE ARRAY"
+            while i < array.__len__():
+                word += array[i]
+                i += 1
+                if array[i-1] == ']': break
+            if i >= array.__len__():
+                tokenType = "ERROR"
+                ret.append(Token(word, True, line, tokenType))
+            if tokenType != "ERROR":
+                ret.append(Token(word, True, line, tokenType))
+                if word[0] != '#':
+                    inspectArray(word[1:word.__len__()-1], line, ret, True)
+                else:
+                    inspectArray(word[2:word.__len__()-1], line, ret, True)
+                word = ""
+            continue
+
+        if array[i] == '(' and (not word or word == '#') and not inByteArr:
             while i < array.__len__():
                 word += array[i]
                 i += 1
@@ -201,7 +263,10 @@ def inspectArray(array: str, line: int, ret: list):
                 if array[i-1] == ')': bracketCount -= 1
                 if bracketCount == 0:
                     ret.append(Token(word, True, line, "CONSTANT ARRAY"))
-                    inspectArray(word[1:word.__len__()-1], line, ret)
+                    if word[0] != '#':
+                        inspectArray(word[1:word.__len__()-1], line, ret)
+                    else:
+                        inspectArray(word[2:word.__len__()-1], line, ret)
                     word = ""
                     break
                     i += 1 
@@ -211,12 +276,31 @@ def inspectArray(array: str, line: int, ret: list):
             word += array[i]
         else:
             if word:
-               #ret.append(word)
-               ret.append(Token(word, True, line))
+                if not inByteArr:
+                    ret.append(Token(word, True, line))
+                else:
+                    if representsInt(word):
+                        ret.append(Token(word, True, line, "INTEGER"))
+                    else:
+                        ret.append(Token(word, True, line, "BYTE ERROR"))
             word = ""     
         i += 1
+
     if word:
-        ret.append(Token(word, True, line))        
+        if not inByteArr:
+            ret.append(Token(word, True, line))
+        else:
+            if representsInt(word):
+                ret.append(Token(word, True, line, "INTEGER"))
+            else:
+                ret.append(Token(word, True, line, "BYTE ERROR"))      
+
+def representsInt(s: str):
+    try: 
+        int(s)
+        return True
+    except ValueError:
+        return False
 
 tokens = readFile("a.txt")
 printTokens(tokens, 2)

@@ -3,9 +3,15 @@
 'string 
 can also 
 contain embedded newline'
-#'this is an array:' #(a b 1 2 (1 2 ('ab')) 3) 
+#'these are arrays:' #(a #'b' [1 2] #[1 a 3 b] #(1 2 ('ab')) 3) 
+#()
+#'these are byte arrays:' #[ 1 2 3] #[1 (1 2) a] 
+#[] #[ 1 2
+]
 123 @123
-'this is an error array:' #(1 2 3 (1 2))ab
-'these are constant' symbol: #'a' #'lqd'
+'these are error arrays:' #(1   2 3 (1 2))ab #(a b
+c d)
+
+'these are constants' symbol: #'a' #'lqd'
 
 #'end of test'
