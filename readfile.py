@@ -1,6 +1,8 @@
 from reserved import *
 import sys
 
+listVariables = []
+
 def readFile(fileName: str):
     tokens = []
     try:
@@ -16,6 +18,9 @@ def readFile(fileName: str):
     i = 0
     tokenType = ""
     while i < data.__len__():
+        if data[i].isdigit():
+            pass
+
         if data[i] == '|':
             lexeme = ""
             j=i+1
@@ -67,6 +72,7 @@ def readFile(fileName: str):
                             tmpVar+=data[i]
                             i+=1
                     if checkVar:
+                        listVariables.append(tmpVar)
                         tmpToken.append(Token(tmpVar, False, line, "VARIABLE"))
                     else: tmpToken.append(Token(tmpVar, False, line, "ERROR"))
                 i+=1
@@ -75,7 +81,8 @@ def readFile(fileName: str):
                 for token in tmpToken:
                     tokens.append(token)
             else: tokens.append(Token(lexeme, False, line, "ERROR"))
-            if data[i] == "|": i+=1
+            if data[i-1] == " " and data[i] == "|": i+=1
+            continue
             
         if data[i] == '.' and not name and not inSequnece:
             tokens.append(Token(".", False, line, "STATEMENT SEPERATOR"))
@@ -404,3 +411,5 @@ def representsInt(s: str):
 
 tokens = readFile(str(sys.argv[1]))
 printTokens(tokens, 2)
+for variable in listVariables:
+    print(variable)

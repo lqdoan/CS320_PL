@@ -1,0 +1,1 @@
+'declare variables:'. |a t1 t2|
