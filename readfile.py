@@ -390,4 +390,17 @@ def representsInt(s: str):
 tokens = readFile("a3.txt")
 printTokens(tokens, 2)
 
+for token in tokens:
+    print(token.name + ' ' + token.type)
 
+tokens = readFile("a.txt")
+printTokens(tokens, 2)
+
+for token in tokens:
+    print(token.name + ' ' + token.type)
+
+tokens = readFile("a2.txt")
+printTokens(tokens, 2)
+
+for token in tokens:
+    print(token.name + ' ' + token.type)

@@ -1,5 +1,9 @@
 keywords = [
-    	"nil", "true", "false", "self", "super", "thisContext", "Transcript", "clear",
+    "nil", "true", "false", "self", "super"
+]
+
+messages = [
+	"thisContext", "Transcript", "clear",
 	"show", "nextPutAll", "nextPut", "space", "tab", "cr". "printOn", "storeOn",
 	"endEntry", "Object", "new", "class", "superclass", "Integer", "allInstances",
 	"allSuperclasses", "hash", "copy", "shallowCopy", "deepCopy", "veryDeepCopy",

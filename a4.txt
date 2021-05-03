@@ -1,0 +1,3 @@
+| a b c |
+
+"this is error declared variable:". |"a" 'b' (a b)|
