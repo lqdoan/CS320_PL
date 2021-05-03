@@ -1,3 +1,54 @@
+from numpy.core.defchararray import isalnum, isalpha
+
+keywords = [
+    "nil", "true", "false", "self", "super"
+]
+
+messages = [
+	"thisContext", "Transcript", "clear",
+	"show", "nextPutAll", "nextPut", "space", "tab", "cr", "printOn", "storeOn",
+	"endEntry", "Object", "new", "class", "superclass", "Integer", "allInstances",
+	"allSuperclasses", "hash", "copy", "shallowCopy", "deepCopy", "veryDeepCopy",
+	"not", "isNil", "isZero", "positive", "strictlyPositive", "negative", "even",
+	"odd", "isLiteral", "isInteger", "isFloat", "isNumber", "isUppercase", "isLowercase",
+	"sign", "negated", "integerPart", "fractionPart", "reciprocal", "squared", "sqrt",
+	"exp", "abs", "rounded", "truncated", "floor", "ceiling", "factorial", "ln", "log",
+	"degreesToRadians", "radiansToDegrees", "sin", "cos", "tan", "arcSin", "arcCos",
+	"arcTan", "Float", "pi", "e", "infinity", "nan", "Random", "new", "next", "yourself",
+	"atRandom", "highbit", "bitAnd", "bitOr", "bitXor", "bitInvert", "bitShift", "bitAt",
+	"allMask", "anyMask", "noMask", "and", "or", "eqv", "xor", "between", "isKindOf",
+	"isMemberOf", "respondsTo", "raisedTo", "raisedToInteger", "roundTo", "truncateTo",
+	"quo", "rem", "gcd", "lcm", "floorLog", "asInteger", "asFraction", "asFloat", "asCharacter",
+	"asciiValue", "printString", "storeString", "radix", "printStringBase", "storeStringBase",
+	"argOne", "argTwo", "ifTrue", "ifFalse", "switch", "at", "put", "timesRepeat",
+	"isLetter", "isDigit", "isAlphaNumeric", "isSeparator", "isVowel", "digitValue",
+	"asLowercase", "asUppercase", "asString", "max", "isEmpty", "size", "copyFrom",
+	"to", "indexOf", "ifAbsent", "occurrencesOf", "conform", "select", "reject", "collect",
+	"detect", "ifNone", "inject", "shuffled", "asArray", "asByteArray", "asWordArray",
+	"asOrderedCollection", "asSortedCollection", "asBag", "asSet", "SortedCollection",
+	"sortBlock", "addFirst", "removeFirst", "addLast", "removeLast", "addAll", "removeAll",
+	"remove", "isEmpty", "first", "last", "includes", "Dictionary", "keyAtValue",
+	"removeKey", "includesKey", "keys", "values", "keysDo", "associationsDo", "keysAndValuesDo",
+	"Smalltalk", "CMRGlobal", "CMRDictionary", "ReadStream", "peek", "contents", "atEnd",
+	"ReadWriteStream", "position", "nextLine", "FileStream", "newFileNamed", "oldFileNamed",
+	"close", "Date", "today", "dateAndTimeNow", "readFromString", "newDay", "fromDays",
+	"dayOfWeek", "indexOfMonth", "daysInMonth", "daysInYear", "nameOfDay", "nameOfMonth",
+	"leapYear", "weekday", "previous", "dayOfMonth", "day", "firstDayOfMonth", "monthName",
+	"monthIndex", "daysInMonth", "year", "daysInYear", "daysLeftInYear", "asSeconds",
+	"addDays", "subtractDays", "subtractDate", "printFormat", "Time", "dateAndTimeNow",
+	"fromSeconds", "millisecondClockValue", "totalSeconds", "seconds", "minutes", "hours",
+	"addTime", "subtractTime", "millisecondsToRun", "dotProduct", "Rectangle", "Display",
+	"restoreAfter", "fillWhite", "Pen", "squareNib", "color", "home", "up", "down", "north",
+	"turn", "direction", "go", "location", "goto", "place", "print", "extent", "withFont",
+	"width", "height", "perform", "evaluate", "name", "category", "comment", "kindOfSubclass",
+	"definition", "instVarNames", "allInstVarNames", "classVarNames", "allClassVarNames",
+	"sharedPools", "allSharedPools", "selectors", "sourceCodeAt", "withAllSuperclasses",
+	"subclasses", "allSubclasses", "withAllSubclasses", "instSize", "isFixed", "isVariable",
+	"isPointers", "isBits", "isBytes", "isWords", "inspect", "browse", "confirm", "halt",
+	"notify", "error", "doesNotUnderstand", "shouldNotImplement", "subclassResponsibility",
+	"errorImproperStore", "errorNonIntegerIndex", "errorSubscriptBounds", "primitiveFailed",
+	"become", "FillInTheBlank"
+]
 class Token:
     def __init__(self, tokenName: str, inArr: bool, tokenLine:int, tokenType = ""):
         self.name = tokenName
@@ -60,7 +111,16 @@ def printTokens(tokens: list, mode: int): #if mode = 1 or 2, display may have so
         for line in display:
             print('{:>50} {:>20} {:>20} {:>20}'.format(*line))
 
+def isKeyword(lexeme: str):
+    return lexeme in keywords
+
+def isMessage(lexeme: str):
+    return lexeme in keywords
+
+
+
 def readFile(fileName: str):
+    
     tokens = []
     try:
         f = open(fileName,"r")
@@ -69,12 +129,51 @@ def readFile(fileName: str):
         print(fileName)
         return []
     data = f.read()
+    
     name = ""
     line = 1
     inSequnece = None
     i = 0
     tokenType = ""
     while i < data.__len__():
+        if data[i] == '|':
+            lexeme = ""
+            j = i + 1
+            while j < data.__len__():
+                lexeme+=data[j]
+
+                #check declare variable, format | var1 var2 ... varN |, in 1 line
+                if data[j] == '\n': 
+                    tmp = ""
+                    while data[i] != " ":
+                        tmp+=data[i]
+                        i+=1
+                    tokens.append(Token(tmp, False, line, "ERROR"))
+                    continue
+
+                if data[j] == '|': 
+                    lexeme = '|' + lexeme
+                    tokens.append(Token(lexeme, False, line, "DECLARE VARIABLE"))
+                    break
+                j+=1
+            i = j
+            # count = 0;
+            # for i in range(i, j+1):
+            #     tmpVar = ""
+            #     if data[i].isalpha():
+            #         lexeme = ""
+            #         checkVar = True
+            #         while  i < j+1 and isalnum(data[i+1]):
+            #             lexeme+=data[i]
+            #             i+=1
+            #         if (i < j + 1):
+            #             lexeme+=data[i]
+            #         if(checkVar == True):
+            #             tokens.append(Token(tmpVar, False, line, "VARIABLE"))
+            #         else: tokens.append(Token(tmpVar, False, line, "ERROR"))
+            #     i+=1
+
+
         if data[i] == '.' and not name and not inSequnece:
             tokens.append(Token(".", False, line, "STATEMENT SEPERATOR"))
             i += 1
@@ -84,12 +183,12 @@ def readFile(fileName: str):
             if name:
                 tokens.append(Token(name, False, line))
                 name = ""
-            tokens.append(Token('[', False, line, "LEFT SQU.BRACKET"))
+            tokens.append(Token('[', False, line, "LBRAC"))
             i += 1
             continue
 
         if data[i] == ']' and not name and not inSequnece:
-            tokens.append(Token("]", False, line, "RIGHT SQU.BRACKET"))
+            tokens.append(Token("]", False, line, "RBRAC"))
             i += 1
             continue
 
@@ -105,7 +204,6 @@ def readFile(fileName: str):
             tokens.append(Token(")", False, line, "RIGHT PARENTHESE"))
             i += 1
             continue
-
         if (data[i] == '\'' or data[i] =='\"') and not inSequnece and not name:
             inSequnece = data[i]
             if inSequnece == '\'':
@@ -120,25 +218,15 @@ def readFile(fileName: str):
                 else: break
             if i >= data.__len__():
                 tokenType = "ERROR"
-            sep = False
-            newline = False
             if i+1 < data.__len__():
-                if data[i+1] != ' ' and data[i+1] != '\n' and data[i+1] != '.':
+                if data[i+1] != ' ' and data[i+1] != '\n':
                     tokenType = "ERROR"
-                if data[i+1] == '.': sep = True
-                if data[i+1] == '\n': newline = True
+                if data[i+1] == '\n': line += 1
             if tokenType != "ERROR":
                 tokens.append(Token(name, False, line, tokenType))
-                if sep:
-                    i += 1 
-                    tokens.append(Token(".", False, line, "STATEMENT SEPERATOR"))
-                if newline: line += 1
                 name = ""
                 inSequnece = None
                 tokenType = ""
-                i += 1
-                continue
-            if newline: line += 1
             i += 1
             continue
 
@@ -242,7 +330,24 @@ def readFile(fileName: str):
                             tokens.append(Token(".", False, line, 'STATEMENT SEPERATE'))
                         i += 1
                     continue
-                
+        
+        # * Scan Id or Keyword or Messages
+        if isalpha(data[i]):
+            lexeme = ""
+            while i < data.__len__() - 1 and isalnum(data[i+1]):
+                lexeme += data[i]
+                i += 1
+            if (i < data.__len__()):
+                lexeme += data[i]
+                i += 1
+            if (lexeme in keywords):
+                tokens.append(Token(lexeme, False, line, 'KEYWORD'))
+            elif (lexeme in messages):
+                tokens.append(Token(lexeme, False, line, 'MESSAGE'))
+            else:
+                tokens.append(Token(lexeme, False, line, 'ID'))
+            continue
+
         if data[i] != ' ' and data[i] != '\n':
             name += data[i]
         else:
@@ -257,7 +362,7 @@ def readFile(fileName: str):
                         if representsInt(tmp[0]) and representsInt(tmp[1]):
                             tokens.append(Token(name, False, line, "FLOAT"))
                             for t in reversed(tmpArr):
-                                tokens.append(Token(t, False, line))
+                                tokens.append(Token(t, False, line,))
                             name = ""
                             continue
                 if ' ' in name:
@@ -266,11 +371,11 @@ def readFile(fileName: str):
                         if sn:
                             tokens.append(Token(sn, False, line))
                     for t in reversed(tmpArr):
-                                tokens.append(Token(t, False, line))
+                                tokens.append(Token(t, False, line,))
                 else: 
                     tokens.append(Token(name, False, line))
                     for t in reversed(tmpArr):
-                                tokens.append(Token(t, False, line))
+                                tokens.append(Token(t, False, line,))
                 name = ""
                 tokenType = ""
                 if inSequnece: inSequnece = None
@@ -289,20 +394,20 @@ def readFile(fileName: str):
                 if representsInt(tmp[0]) and representsInt(tmp[1]):
                     tokens.append(Token(name, False, line, "FLOAT"))
                     for t in reversed(tmpArr):
-                        tokens.append(Token(t, False, line))
+                        tokens.append(Token(t, False, line,))
                     name = ""
                     return 
         if ' ' in name:
             snArr = name.split(sep = ' ')
             for sn in snArr:
                 if sn:
-                    tokens.append(Token(sn, False, line, tokenType))
+                    tokens.append(Token(sn, False, line))
             for t in reversed(tmpArr):
-                tokens.append(Token(t, False, line))
+                tokens.append(Token(t, False, line,))
         else: 
-            tokens.append(Token(name, False, line, tokenType))
+            tokens.append(Token(name, False, line))
             for t in reversed(tmpArr):
-                tokens.append(Token(t, False, line))
+                tokens.append(Token(t, False, line,))
     
     f.close()
     return tokens
@@ -398,6 +503,23 @@ def representsInt(s: str):
     except ValueError:
         return False
 
+# tokens = readFile("a3.txt")
+# printTokens(tokens, 2)
 
+# for token in tokens:
+#     print(token.name + ' ' + token.type)
 
+# tokens = readFile("a.txt")
+# printTokens(tokens, 2)
 
+# for token in tokens:
+#     print(token.name + ' ' + token.type)
+
+# tokens = readFile("a2.txt")
+# printTokens(tokens, 2)
+
+# for token in tokens:
+#     print(token.name + ' ' + token.type)
+
+tokens = readFile("a4.txt")
+printTokens(tokens, 2)
