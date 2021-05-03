@@ -1,1 +1,4 @@
 'declare variables:'. |a t1 t2|
+two@#
+#(1.3 2 two@$)
+56.5

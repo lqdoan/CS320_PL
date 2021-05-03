@@ -266,7 +266,7 @@ def readFile(fileName: str):
                     tmp = name.split(sep = '.')
                     if tmp.__len__() == 2:
                         if representsInt(tmp[0]) and representsInt(tmp[1]):
-                            tokens.append(Token(name, False, line, "FLOAT"))
+                            tokens.append(Token(name, False, line, "NUMBER"))
                             for t in reversed(tmpArr):
                                 tokens.append(Token(t, False, line))
                             name = ""
@@ -409,7 +409,17 @@ def representsInt(s: str):
     except ValueError:
         return False
 
-'''
-tokens, listVariables = readFile("a2.txt")
+
+tokens, listVariables = readFile(str(sys.argv[1]))
+
+# for variable in listVariables:
+#     print(variable)
+
+for token in tokens:
+    if token.type != "": continue
+    if isId(token.name):
+        token.type = "ID"
+    elif isRadixFloat(token.name) or isInt(token.name) or isFloat(token.name):
+        token.type = "NUMBER"
+
 printTokens(tokens, 2)
-'''

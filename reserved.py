@@ -19,6 +19,28 @@ def isId(s: str):
             return True
     return False
 
+def isInt(s: str):
+    if 'e' in s:
+        tmp = s.split(sep = 'e')
+        if not isInt(tmp[0]): return False
+        if not isInt(tmp[1]): return False
+        return True
+    if s[0] == "-":
+        return representsInt(s[1:s.__len__()])
+    else: return representsInt(s)
+
+def isFloat(s: str):
+    if isInt(s): return True
+    if '.' in s:
+        tmpF = s.split(sep = '.')
+        if not isInt(tmpF[0]): return False
+        if 'e' in tmpF[1]:
+            tmpE = s.split(sep = 'e')
+            if not isInt(tmpE[0]): return False
+            if not isInt(tmpE[1]): return False  
+        elif not isInt(tmpF[1]): return False
+    return True
+
 def isRadixNum(s: str):
     tmps = s + ""
     if 'r' in tmps:
