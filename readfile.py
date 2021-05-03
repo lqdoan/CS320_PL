@@ -411,7 +411,7 @@ def representsInt(s: str):
 
 
 tokens, listVariables = readFile(str(sys.argv[1]))
-
+# tokens, listVariables = readFile("a5.txt")
 # for variable in listVariables:
 #     print(variable)
 

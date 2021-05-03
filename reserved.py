@@ -35,7 +35,7 @@ def isFloat(s: str):
         tmpF = s.split(sep = '.')
         if not isInt(tmpF[0]): return False
         if 'e' in tmpF[1]:
-            tmpE = s.split(sep = 'e')
+            tmpE = tmpF[1].split(sep = 'e')
             if not isInt(tmpE[0]): return False
             if not isInt(tmpE[1]): return False  
         elif not isInt(tmpF[1]): return False
