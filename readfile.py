@@ -410,7 +410,7 @@ def representsInt(s: str):
     except ValueError:
         return False
 
-
+'''
 tokens, listVariables = readFile("a2.txt")
 printTokens(tokens, 2)
-
+'''
