@@ -1,4 +1,4 @@
-globalVars = []
+from numpy.core.defchararray import isalnum, isalpha
 
 keywords = [
     "nil", "true", "false", "self", "super"
@@ -49,7 +49,6 @@ messages = [
 	"errorImproperStore", "errorNonIntegerIndex", "errorSubscriptBounds", "primitiveFailed",
 	"become", "FillInTheBlank"
 ]
-
 class Token:
     def __init__(self, tokenName: str, inArr: bool, tokenLine:int, tokenType = ""):
         self.name = tokenName
@@ -112,7 +111,16 @@ def printTokens(tokens: list, mode: int): #if mode = 1 or 2, display may have so
         for line in display:
             print('{:>50} {:>20} {:>20} {:>20}'.format(*line))
 
+def isKeyword(lexeme: str):
+    return lexeme in keywords
+
+def isMessage(lexeme: str):
+    return lexeme in keywords
+
+
+
 def readFile(fileName: str):
+    
     tokens = []
     try:
         f = open(fileName,"r")
@@ -121,6 +129,7 @@ def readFile(fileName: str):
         print(fileName)
         return []
     data = f.read()
+    
     name = ""
     line = 1
     inSequnece = None
@@ -174,12 +183,12 @@ def readFile(fileName: str):
             if name:
                 tokens.append(Token(name, False, line))
                 name = ""
-            tokens.append(Token('[', False, line, "LEFT SQU.BRACKET"))
+            tokens.append(Token('[', False, line, "LBRAC"))
             i += 1
             continue
 
         if data[i] == ']' and not name and not inSequnece:
-            tokens.append(Token("]", False, line, "RIGHT SQU.BRACKET"))
+            tokens.append(Token("]", False, line, "RBRAC"))
             i += 1
             continue
 
@@ -321,7 +330,24 @@ def readFile(fileName: str):
                             tokens.append(Token(".", False, line, 'STATEMENT SEPERATE'))
                         i += 1
                     continue
-                
+        
+        # * Scan Id or Keyword or Messages
+        if isalpha(data[i]):
+            lexeme = ""
+            while i < data.__len__() - 1 and isalnum(data[i+1]):
+                lexeme += data[i]
+                i += 1
+            if (i < data.__len__()):
+                lexeme += data[i]
+                i += 1
+            if (lexeme in keywords):
+                tokens.append(Token(lexeme, False, line, 'KEYWORD'))
+            elif (lexeme in messages):
+                tokens.append(Token(lexeme, False, line, 'MESSAGE'))
+            else:
+                tokens.append(Token(lexeme, False, line, 'ID'))
+            continue
+
         if data[i] != ' ' and data[i] != '\n':
             name += data[i]
         else:
