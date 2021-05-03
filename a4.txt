@@ -1,6 +1,7 @@
-"this is error declared variable:".
-| a b c |.
-| |.
-"this is error declared variable:" |"a" 'b' (a b)|.
-
+|aads
+|
+|a23 bb5 c23|
+| |
+|"a" 'b' (a b)|
 | asd"asdasd  |
+|aads

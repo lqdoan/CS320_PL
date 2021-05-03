@@ -1,4 +1,5 @@
 from reserved import *
+import sys
 
 def readFile(fileName: str):
     tokens = []
@@ -15,6 +16,67 @@ def readFile(fileName: str):
     i = 0
     tokenType = ""
     while i < data.__len__():
+        if data[i] == '|':
+            lexeme = ""
+            j=i+1
+            isDecVar = True
+            while j < data.__len__():
+                if data[j] == '|': break
+                if data[j] == '\n' or j+1 >= data.__len__():
+                    isDecVar = False
+                    tmp = ""
+                    while i < j:
+                        tmp+=data[i]
+                        i+=1
+                    tokens.append(Token(tmp, False, line, "ERROR"))
+                    break
+                j+=1
+            if not isDecVar: 
+                i = j+1
+                continue
+
+            j=i+1
+            while j < data.__len__():
+                lexeme+=data[j]
+
+                if data[j] == '|': 
+                    lexeme ='|' + lexeme
+                    # tokens.append(Token(lexeme, False, line, "DECLARE VARIABLE"))
+                    i+=1
+                    break
+                j+=1
+
+            count = 0;
+            tmpToken = []
+            while i < j:
+                tmpVar = ""
+                if not data[i] == " ":
+                    count+=1
+                    checkVar = True
+                    tmpVar+=data[i]
+                    if not data[i].isalpha(): 
+                        checkVar = False
+                        i+=1
+                        while not data[i] == " " and not data[i] == "|":
+                            tmpVar+=data[i]
+                            i+=1
+                    else:
+                        i+=1
+                        while not data[i] == " " and not data[i] == "|":
+                            if not data[i].isalnum(): checkVar = False
+                            tmpVar+=data[i]
+                            i+=1
+                    if checkVar:
+                        tmpToken.append(Token(tmpVar, False, line, "VARIABLE"))
+                    else: tmpToken.append(Token(tmpVar, False, line, "ERROR"))
+                i+=1
+            if count > 0:
+                tokens.append(Token(lexeme, False, line, "DECLARE VARIABLE"))
+                for token in tmpToken:
+                    tokens.append(token)
+            else: tokens.append(Token(lexeme, False, line, "ERROR"))
+            if data[i] == "|": i+=1
+            
         if data[i] == '.' and not name and not inSequnece:
             tokens.append(Token(".", False, line, "STATEMENT SEPERATOR"))
             i += 1
@@ -340,5 +402,5 @@ def representsInt(s: str):
         return False
 
 
-tokens = readFile("a.txt")
+tokens = readFile(str(sys.argv[1]))
 printTokens(tokens, 2)
