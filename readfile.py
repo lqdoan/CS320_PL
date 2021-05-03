@@ -17,10 +17,13 @@ def readFile(fileName: str):
     tokenType = ""
     listVariables = []
     while i < data.__len__():
-        if data[i].isdigit():
-            pass
 
-        if data[i] == '|':
+        if data[i] == '^' and not name:
+            tokens.append(Token("^", False, line, "RETURN INDICATION"))
+            i += 1
+            continue
+
+        if data[i] == '|' and not name:
             lexeme = ""
             j=i+1
             isDecVar = True
@@ -408,7 +411,6 @@ def representsInt(s: str):
         return False
 
 
-tokens, listVariables = readFile(str(sys.argv[1]))
+tokens, listVariables = readFile("a2.txt")
 printTokens(tokens, 2)
-for variable in listVariables:
-    print(variable)
+
