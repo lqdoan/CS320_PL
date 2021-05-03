@@ -20,17 +20,19 @@ def isId(s: str):
     return False
 
 def isRadixNum(s: str):
-    tmps = s.upper()
-    if 'R' in tmps:
-        tmp = tmps.split(sep = 'R')
+    tmps = s + ""
+    if 'r' in tmps:
+        tmp = tmps.split(sep = 'r')
         if tmp.__len__()==2:
             if representsInt(tmp[0]):
                 tmp[0] = int(tmp[0])
-                tmp[1] = tmp[1].upper()
                 for t in tmp[1]:
                     if t.isdigit(): 
                         if int(t) > tmp[0]: return False 
                     elif t.isalpha():
+                        if ord(t) < 65: 
+                            print("invoke")
+                            return False
                         if ord(t) - 55 > tmp[0]: return False
                     else: return False
             else: return False
@@ -40,13 +42,20 @@ def isRadixNum(s: str):
 
 def isRadixFloat(s: str):
     if isRadixNum(s): return True
-    tmps = s.upper()
+    tmps = s + ""
+    if 'e' in tmps:
+        tmp0 = tmps.split(sep = 'e')
+        if tmp0.__len__() == 2:
+            tmps = tmp0[0]
+            if not representsInt(tmp0[1]): return False
+        else: False
+    if isRadixNum(tmps): return True
     if '.' in tmps:
         tmp = tmps.split(sep = '.')
         if tmp.__len__() == 2:
             if not isRadixNum(tmp[0]): return False
-            tmp2 = tmp[0].split(sep = 'R')[0]
-            tmp2 += "R"
+            tmp2 = tmp[0].split(sep = 'r')[0]
+            tmp2 += "r"
             tmp2 += tmp[1]
             if not isRadixNum(tmp2): return False
         else: return False    
@@ -61,7 +70,7 @@ class Token:
         self.type = tokenType
 
 def printTokens(tokens: list, mode: int): #if mode = 1 or 2, display may have some bugs when a token has newline in its name
-    print("Note: Byte error occurs when an element in byte array is not an interger.\n")
+    print("Note: BYTE ERROR occurs when an element in byte array is not an interger.\n")
     if mode == 1:
         display = [["NAME", "TYPE", "LINE"]]
         line = []

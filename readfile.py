@@ -301,8 +301,7 @@ def readFile(fileName: str):
                     tokens.append(Token(name, False, line, "FLOAT"))
                     for t in reversed(tmpArr):
                         tokens.append(Token(t, False, line))
-                    name = ""
-                    return 
+                    return tokens, listVariables
         if ' ' in name:
             snArr = name.split(sep = ' ')
             for sn in snArr:
