@@ -10,6 +10,49 @@ def representsInt(s: str):
         return True
     except ValueError:
         return False
+
+def isId(s: str):
+    if s:
+        if s[0].isalpha():
+            for i in range (1, s.__len__()):
+                if not s[i].isalnum(): return False
+            return True
+    return False
+
+def isRadixNum(s: str):
+    tmps = s.upper()
+    if 'R' in tmps:
+        tmp = tmps.split(sep = 'R')
+        if tmp.__len__()==2:
+            if representsInt(tmp[0]):
+                tmp[0] = int(tmp[0])
+                tmp[1] = tmp[1].upper()
+                for t in tmp[1]:
+                    if t.isdigit(): 
+                        if int(t) > tmp[0]: return False 
+                    elif t.isalpha():
+                        if ord(t) - 55 > tmp[0]: return False
+                    else: return False
+            else: return False
+        else: return False
+    else: return False
+    return True
+
+def isRadixFloat(s: str):
+    if isRadixNum(s): return True
+    tmps = s.upper()
+    if '.' in tmps:
+        tmp = tmps.split(sep = '.')
+        if tmp.__len__() == 2:
+            if not isRadixNum(tmp[0]): return False
+            tmp2 = tmp[0].split(sep = 'R')[0]
+            tmp2 += "R"
+            tmp2 += tmp[1]
+            if not isRadixNum(tmp2): return False
+        else: return False    
+    else: return False
+    return True
+
 class Token:
     def __init__(self, tokenName: str, inArr: bool, tokenLine:int, tokenType = ""):
         self.name = tokenName
