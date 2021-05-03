@@ -1,3 +1,55 @@
+globalVars = []
+
+keywords = [
+    "nil", "true", "false", "self", "super"
+]
+
+messages = [
+	"thisContext", "Transcript", "clear",
+	"show", "nextPutAll", "nextPut", "space", "tab", "cr", "printOn", "storeOn",
+	"endEntry", "Object", "new", "class", "superclass", "Integer", "allInstances",
+	"allSuperclasses", "hash", "copy", "shallowCopy", "deepCopy", "veryDeepCopy",
+	"not", "isNil", "isZero", "positive", "strictlyPositive", "negative", "even",
+	"odd", "isLiteral", "isInteger", "isFloat", "isNumber", "isUppercase", "isLowercase",
+	"sign", "negated", "integerPart", "fractionPart", "reciprocal", "squared", "sqrt",
+	"exp", "abs", "rounded", "truncated", "floor", "ceiling", "factorial", "ln", "log",
+	"degreesToRadians", "radiansToDegrees", "sin", "cos", "tan", "arcSin", "arcCos",
+	"arcTan", "Float", "pi", "e", "infinity", "nan", "Random", "new", "next", "yourself",
+	"atRandom", "highbit", "bitAnd", "bitOr", "bitXor", "bitInvert", "bitShift", "bitAt",
+	"allMask", "anyMask", "noMask", "and", "or", "eqv", "xor", "between", "isKindOf",
+	"isMemberOf", "respondsTo", "raisedTo", "raisedToInteger", "roundTo", "truncateTo",
+	"quo", "rem", "gcd", "lcm", "floorLog", "asInteger", "asFraction", "asFloat", "asCharacter",
+	"asciiValue", "printString", "storeString", "radix", "printStringBase", "storeStringBase",
+	"argOne", "argTwo", "ifTrue", "ifFalse", "switch", "at", "put", "timesRepeat",
+	"isLetter", "isDigit", "isAlphaNumeric", "isSeparator", "isVowel", "digitValue",
+	"asLowercase", "asUppercase", "asString", "max", "isEmpty", "size", "copyFrom",
+	"to", "indexOf", "ifAbsent", "occurrencesOf", "conform", "select", "reject", "collect",
+	"detect", "ifNone", "inject", "shuffled", "asArray", "asByteArray", "asWordArray",
+	"asOrderedCollection", "asSortedCollection", "asBag", "asSet", "SortedCollection",
+	"sortBlock", "addFirst", "removeFirst", "addLast", "removeLast", "addAll", "removeAll",
+	"remove", "isEmpty", "first", "last", "includes", "Dictionary", "keyAtValue",
+	"removeKey", "includesKey", "keys", "values", "keysDo", "associationsDo", "keysAndValuesDo",
+	"Smalltalk", "CMRGlobal", "CMRDictionary", "ReadStream", "peek", "contents", "atEnd",
+	"ReadWriteStream", "position", "nextLine", "FileStream", "newFileNamed", "oldFileNamed",
+	"close", "Date", "today", "dateAndTimeNow", "readFromString", "newDay", "fromDays",
+	"dayOfWeek", "indexOfMonth", "daysInMonth", "daysInYear", "nameOfDay", "nameOfMonth",
+	"leapYear", "weekday", "previous", "dayOfMonth", "day", "firstDayOfMonth", "monthName",
+	"monthIndex", "daysInMonth", "year", "daysInYear", "daysLeftInYear", "asSeconds",
+	"addDays", "subtractDays", "subtractDate", "printFormat", "Time", "dateAndTimeNow",
+	"fromSeconds", "millisecondClockValue", "totalSeconds", "seconds", "minutes", "hours",
+	"addTime", "subtractTime", "millisecondsToRun", "dotProduct", "Rectangle", "Display",
+	"restoreAfter", "fillWhite", "Pen", "squareNib", "color", "home", "up", "down", "north",
+	"turn", "direction", "go", "location", "goto", "place", "print", "extent", "withFont",
+	"width", "height", "perform", "evaluate", "name", "category", "comment", "kindOfSubclass",
+	"definition", "instVarNames", "allInstVarNames", "classVarNames", "allClassVarNames",
+	"sharedPools", "allSharedPools", "selectors", "sourceCodeAt", "withAllSuperclasses",
+	"subclasses", "allSubclasses", "withAllSubclasses", "instSize", "isFixed", "isVariable",
+	"isPointers", "isBits", "isBytes", "isWords", "inspect", "browse", "confirm", "halt",
+	"notify", "error", "doesNotUnderstand", "shouldNotImplement", "subclassResponsibility",
+	"errorImproperStore", "errorNonIntegerIndex", "errorSubscriptBounds", "primitiveFailed",
+	"become", "FillInTheBlank"
+]
+
 class Token:
     def __init__(self, tokenName: str, inArr: bool, tokenLine:int, tokenType = ""):
         self.name = tokenName
@@ -75,6 +127,44 @@ def readFile(fileName: str):
     i = 0
     tokenType = ""
     while i < data.__len__():
+        if data[i] == '|':
+            lexeme = ""
+            j = i + 1
+            while j < data.__len__():
+                lexeme+=data[j]
+
+                #check declare variable, format | var1 var2 ... varN |, in 1 line
+                if data[j] == '\n': 
+                    tmp = ""
+                    while data[i] != " ":
+                        tmp+=data[i]
+                        i+=1
+                    tokens.append(Token(tmp, False, line, "ERROR"))
+                    continue
+
+                if data[j] == '|': 
+                    lexeme = '|' + lexeme
+                    tokens.append(Token(lexeme, False, line, "DECLARE VARIABLE"))
+                    break
+                j+=1
+            i = j
+            # count = 0;
+            # for i in range(i, j+1):
+            #     tmpVar = ""
+            #     if data[i].isalpha():
+            #         lexeme = ""
+            #         checkVar = True
+            #         while  i < j+1 and isalnum(data[i+1]):
+            #             lexeme+=data[i]
+            #             i+=1
+            #         if (i < j + 1):
+            #             lexeme+=data[i]
+            #         if(checkVar == True):
+            #             tokens.append(Token(tmpVar, False, line, "VARIABLE"))
+            #         else: tokens.append(Token(tmpVar, False, line, "ERROR"))
+            #     i+=1
+
+
         if data[i] == '.' and not name and not inSequnece:
             tokens.append(Token(".", False, line, "STATEMENT SEPERATOR"))
             i += 1
@@ -387,20 +477,23 @@ def representsInt(s: str):
     except ValueError:
         return False
 
-tokens = readFile("a3.txt")
+# tokens = readFile("a3.txt")
+# printTokens(tokens, 2)
+
+# for token in tokens:
+#     print(token.name + ' ' + token.type)
+
+# tokens = readFile("a.txt")
+# printTokens(tokens, 2)
+
+# for token in tokens:
+#     print(token.name + ' ' + token.type)
+
+# tokens = readFile("a2.txt")
+# printTokens(tokens, 2)
+
+# for token in tokens:
+#     print(token.name + ' ' + token.type)
+
+tokens = readFile("a4.txt")
 printTokens(tokens, 2)
-
-for token in tokens:
-    print(token.name + ' ' + token.type)
-
-tokens = readFile("a.txt")
-printTokens(tokens, 2)
-
-for token in tokens:
-    print(token.name + ' ' + token.type)
-
-tokens = readFile("a2.txt")
-printTokens(tokens, 2)
-
-for token in tokens:
-    print(token.name + ' ' + token.type)
