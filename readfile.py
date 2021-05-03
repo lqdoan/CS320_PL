@@ -1,8 +1,6 @@
 from reserved import *
 import sys
 
-listVariables = []
-
 def readFile(fileName: str):
     tokens = []
     try:
@@ -17,6 +15,7 @@ def readFile(fileName: str):
     inSequnece = None
     i = 0
     tokenType = ""
+    listVariables = []
     while i < data.__len__():
         if data[i].isdigit():
             pass
@@ -315,7 +314,7 @@ def readFile(fileName: str):
                 tokens.append(Token(t, False, line))
     
     f.close()
-    return tokens
+    return tokens, listVariables
 
 def inspectArray(array: str, line: int, ret: list, inByteArr = False):
     word = ""
@@ -409,7 +408,7 @@ def representsInt(s: str):
         return False
 
 
-tokens = readFile(str(sys.argv[1]))
+tokens, listVariables = readFile(str(sys.argv[1]))
 printTokens(tokens, 2)
 for variable in listVariables:
     print(variable)
