@@ -3,4 +3,6 @@
 |a23 bb5 c23|.
 | |.
 |"a" 'b' (a b)|.
-| asd"asdasd  |
+| asd"asdasd  |.
+x := Random new next; yourself. x next.
+sum := x inject: 0 into: [:a :c | a + c].

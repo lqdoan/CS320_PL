@@ -409,19 +409,3 @@ def representsInt(s: str):
     except ValueError:
         return False
 
-tokens, listVariables = readFile(str(sys.argv[1]))
-
-for index, token in enumerate(tokens):
-    if token.type != "": continue
-    if isId(token.name):
-        next = index + 1
-        if (next < len(tokens) and tokens[next].name == ":="):
-            token.type = "VARIABLE"
-            tokens[next].type = "ASSIGNMENT"
-            token = tokens[next]
-        else:    
-            token.type = "ID"
-    elif isRadixFloat(token.name) or isInt(token.name) or isFloat(token.name):
-        token.type = "NUMBER"
-
-printTokens(tokens, 2)
