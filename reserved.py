@@ -5,6 +5,14 @@ def representsInt(s: str):
     except ValueError:
         return False
 
+def isMessID(s: str):
+    if ':' in s:
+        tmp = s.split(sep = ':')
+        if not tmp[1] == "": return False
+        if isId(tmp[0]): return True
+        return False
+    return False
+
 def isId(s: str):
     if s:
         if s[0].isalpha():
@@ -33,6 +41,7 @@ def isFloat(s: str):
             if not isInt(tmpE[0]): return False
             if not isInt(tmpE[1]): return False  
         elif not isInt(tmpF[1]): return False
+    else: return False
     return True
 
 def isRadixNum(s: str):

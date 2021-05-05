@@ -17,5 +17,7 @@ for index, token in enumerate(tokens):
             token.type = "ID"
     elif isRadixFloat(token.name) or isInt(token.name) or isFloat(token.name):
         token.type = "NUMBER"
+    elif isMessID(token.name):
+        token.type = "MESSAGE"
 processTokens(tokens)
 printTokens(tokens, 2)
