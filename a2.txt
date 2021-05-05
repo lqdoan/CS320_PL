@@ -1,6 +1,1 @@
-#'sym'. 'line'.
-#a:a
-this is a statement. this is another
-'pi'. 3.14
-this is a 'statement'.
-this is #(a statement).
+#( 1 2 [1 2 2r11])

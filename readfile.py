@@ -1,5 +1,4 @@
 from reserved import *
-import sys
 
 def readFile(fileName: str):
     tokens = []
@@ -53,7 +52,7 @@ def readFile(fileName: str):
                     break
                 j+=1
 
-            count = 0;
+            count = 0
             tmpToken = []
             while i < j:
                 tmpVar = ""
@@ -90,7 +89,12 @@ def readFile(fileName: str):
             tokens.append(Token(".", False, line, "STATEMENT SEPERATOR"))
             i += 1
             continue
-
+        
+        if data[i] == ';' and not name:
+            tokens.append(Token(";", False, line, "MESSAGE SEPERATOR"))
+            i += 1
+            continue
+        
         if data[i] == '[' and name != "#":
             if name:
                 tokens.append(Token(name, False, line))
@@ -168,9 +172,10 @@ def readFile(fileName: str):
                     if i >= data.__len__():
                         tokenType = "ERROR"
                     if i+1 < data.__len__():
-                        if data[i+1] == '.':
+                        if data[i+1] == '.' or data[i+1] == ';':
+                            j = i + 1
                             sep = True
-                        elif data[i+1] != ' ' and data[i+1] != '\n' and data[i+1] != '.':
+                        elif data[i+1] != ' ' and data[i+1] != '\n' and data[i+1] != '.' and data[i] != ';':
                             tokenType = "ERROR"
                         if data[i+1] == '\n': line += 1
 
@@ -178,7 +183,7 @@ def readFile(fileName: str):
                         #if sep: name = name[0:name.__len__()-1]
                         tokens.append(Token(name, False, line, tokenType))
                         if sep: 
-                            tokens.append(Token('.', False, line, 'STATEMENT SEPERATOR'))
+                            tokens.append(Token(data[j], False, line))
                             i += 1
                         name = ""
                         inSequnece = None
@@ -194,15 +199,20 @@ def readFile(fileName: str):
                         i += 1
                         if data[i-1] == '\n' or data[i-1] == ']': break
                     if data[i-1] == ']':
-                        if i < data.__len__():
-                            if data[i] == ' ' or data[i] == '\n' or data[i] == '.':
+                        if i >= data.__len__():
+                            tokens.append(Token(name, False, line, "BYTE ARRAY"))
+                            name = name[2:name.__len__()-1]
+                            inspectArray(name, line, tokens, True)
+                            continue
+                        elif i < data.__len__():
+                            if data[i] == ' ' or data[i] == '\n' or data[i] == '.' or data[i] == ';':
                                 tokens.append(Token(name, False, line, "BYTE ARRAY"))
                                 name = name[2:name.__len__()-1]
                                 inspectArray(name, line, tokens, True)
                                 name = ""
                                 if data[i] == '\n': line += 1
-                                if data[i] == '.': 
-                                    tokens.append(Token('.', False, line, "STATEMENT SEPERATOR"))
+                                if data[i] == '.' or data[i] == ';': 
+                                    tokens.append(Token(data[i], False, line))
                                     i += 1
                                     continue
                     if i > data.__len__() or data[i-1] == '\n':
@@ -233,24 +243,26 @@ def readFile(fileName: str):
                             break
                         if bracketCount == 0: 
                             break
+                    j = 0
                     tokenType = "CONSTANT ARRAY"
                     if bracketCount != 0:
                         tokenType = ""
                     if i < data.__len__():
-                        if data[i] != ' ' and data[i] != '\n' and data[i] != '.':
+                        if data[i] != ' ' and data[i] != '\n' and data[i] != '.' and data[i] != ';':
                             tokenType = ""
-                        elif data[i] == '.':      
+                        elif data[i] == '.' or data[i] == ';':  
+                            j = i    
                             sep = True
                     if tokenType:             
                         tokens.append(Token(name, False, line, tokenType))
-                        if i < data.__len__():
-                            if data [i] == '\n': line += 1
                         name = name[2:name.__len__()-1]    
                         inspectArray(name, line, tokens)
+                        if i < data.__len__():
+                            if data [i] == '\n': line += 1
                         name = ""
                         tokenType = ""
                         if sep:
-                            tokens.append(Token(".", False, line, 'STATEMENT SEPERATE'))
+                            tokens.append(Token(data[j], False, line))
                         i += 1
                     continue
                 
@@ -259,14 +271,14 @@ def readFile(fileName: str):
         else:
             if name:
                 tmpArr = []
-                while name[name.__len__()-1] == '.' or name[name.__len__()-1] == ')' or name[name.__len__()-1] == ']':
+                while name[name.__len__()-1] == '.' or name[name.__len__()-1] == ')' or name[name.__len__()-1] == ']' or name[name.__len__()-1] == ';' :
                     tmpArr.append(name[name.__len__()-1])
                     name = name[0:name.__len__()-1]
                 if '.' in name:
                     tmp = name.split(sep = '.')
                     if tmp.__len__() == 2:
                         if representsInt(tmp[0]) and representsInt(tmp[1]):
-                            tokens.append(Token(name, False, line, "NUMBER"))
+                            tokens.append(Token(name, False, line, "FLOAT"))
                             for t in reversed(tmpArr):
                                 tokens.append(Token(t, False, line))
                             name = ""
@@ -291,7 +303,7 @@ def readFile(fileName: str):
 
     if name:
         tmpArr = []
-        while name[name.__len__()-1] == '.' or name[name.__len__()-1] == ')' or name[name.__len__()-1] == ']':
+        while name[name.__len__()-1] == '.' or name[name.__len__()-1] == ')' or name[name.__len__()-1] == ']' or name[name.__len__()-1] == ';':
             tmpArr.append(name[name.__len__()-1])
             name = name[0:name.__len__()-1]
         if '.' in name:
@@ -350,7 +362,7 @@ def inspectArray(array: str, line: int, ret: list, inByteArr = False):
                 word += array[i]
                 i += 1
                 if array[i-1] == ']': break
-            if i >= array.__len__():
+            if i > array.__len__():
                 tokenType = "ERROR"
                 ret.append(Token(word, True, line, tokenType))
             if tokenType != "ERROR":
@@ -379,15 +391,15 @@ def inspectArray(array: str, line: int, ret: list, inByteArr = False):
                     i += 1 
             continue
 
-        if array[i] != ' ':
+        if array[i] != ' ' and array[i] != '\n' and array[i] != ';':
             word += array[i]
         else:
             if word:
                 if not inByteArr:
                     ret.append(Token(word, True, line))
                 else:
-                    if representsInt(word):
-                        ret.append(Token(word, True, line, "INTEGER"))
+                    if representsInt(word) or isRadixNum(word):
+                        ret.append(Token(word, True, line, "BYTE INTEGER"))
                     else:
                         ret.append(Token(word, True, line, "BYTE ERROR"))
             word = ""     
@@ -397,15 +409,10 @@ def inspectArray(array: str, line: int, ret: list, inByteArr = False):
         if not inByteArr:
             ret.append(Token(word, True, line))
         else:
-            if representsInt(word):
-                ret.append(Token(word, True, line, "INTEGER"))
+            if representsInt(word) or isRadixNum(word):
+                ret.append(Token(word, True, line, "BYTE INTEGER"))
             else:
                 ret.append(Token(word, True, line, "BYTE ERROR"))      
 
-def representsInt(s: str):
-    try: 
-        int(s)
-        return True
-    except ValueError:
-        return False
+
 

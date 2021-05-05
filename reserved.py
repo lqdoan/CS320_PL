@@ -22,13 +22,14 @@ def isId(s: str):
     return False
 
 def isInt(s: str):
-    if 'e' in s:
-        tmp = s.split(sep = 'e')
-        if not isInt(tmp[0]): return False
-        if not isInt(tmp[1]): return False
-        return True
-    if s[0] == "-":
-        return representsInt(s[1:s.__len__()])
+    if s:
+        if 'e' in s:
+            tmp = s.split(sep = 'e')
+            if not isInt(tmp[0]): return False
+            if not isInt(tmp[1]): return False
+            return True
+        if s[0] == "-":
+            return representsInt(s[1:s.__len__()])
     else: return representsInt(s)
 
 def isFloat(s: str):
@@ -86,6 +87,33 @@ def isRadixFloat(s: str):
         else: return False    
     else: return False
     return True
+
+def canBeSymbol(s: str):
+    if s:
+        tmpArr = ['+', '-', '*', '/', '_', '@', '&', '=']
+        for c in s:
+            if not c.isalnum() and c not in tmpArr:
+                return False
+        return True
+    return False
+
+def isSymbol(s: str):
+    tmps = s
+    if s:
+        if tmps[0] == '#':
+            tmps = tmps[1:tmps.__len__()-1]
+        else: return False
+        if tmps.__len__() > 3:
+            if tmps[0] == tmps[tmps.__len__()-1] and tmps[0] == '\'':
+                return True
+        if canBeSymbol(tmps): return True
+    return False 
+
+def isConsChar(s: str):
+    if s.__len__() == (2):
+        if s[0] == '$' and s[1].isalpha():
+            return True
+    return False
 
 class Token:
     def __init__(self, tokenName: str, inArr: bool, tokenLine:int, tokenType = ""):
@@ -148,3 +176,65 @@ def printTokens(tokens: list, mode: int): #if mode = 1 or 2, display may have so
             line = []
         for line in display:
             print('{:>50} {:>20} {:>20} {:>20}'.format(*line))
+
+#RESERVED LIST FOR PRE-DEFINED TOKENS
+keywords = [
+    "nil", "true", "false", "self", "super"
+]
+operators = [
+    "+", "-", "*", "/", "//", "\\"
+]
+logicalOperators = [
+    'not', '&', '|', 'and', 'or', 'eqv', 'xor'
+]
+bitWiseOperators = [
+    'bitAnd:', 'bitOr:', 'bitXor:', 'bitInvert:', 'bitShift:'
+]
+comparisonOperators = [
+    '=', '~=', '==', '~~', '>', '>=', '<', '<='
+]
+messages = [
+	"thisContext", "Transcript", "clear",
+	"show:", "nextPutAll:", "nextPut:", "space", "tab", "cr", "printOn:", "storeOn:",
+	"endEntry", "Object", "new:", "class", "superclass", "Integer", "allInstances",
+	"allSuperclasses", "hash", "copy", "shallowCopy", "deepCopy", "veryDeepCopy",
+	"not", "isNil", "isZero", "positive", "strictlyPositive", "negative", "even",
+	"odd", "isLiteral", "isInteger", "isFloat", "isNumber", "isUppercase", "isLowercase",
+	"sign", "negated", "integerPart", "fractionPart", "reciprocal", "squared", "sqrt",
+	"exp", "abs", "rounded", "truncated", "floor", "ceiling", "factorial", "ln", "log",
+	"degreesToRadians", "radiansToDegrees", "sin", "cos", "tan", "arcSin", "arcCos",
+	"arcTan", "Float", "pi", "e", "infinity", "nan", "Random", "new", "next", "yourself",
+	"atRandom", "highbit", "bitAt",
+	"allMask:", "anyMask:", "noMask:", "and:", "or", "eqv", "xor", "between", "isKindOf:",
+	"isMemberOf:", "respondsTo:", "raisedTo:", "raisedToInteger", "roundTo", "truncateTo",
+	"quo:", "rem:", "gcd:", "lcm:", "floorLog", "asInteger", "asFraction", "asFloat", "asCharacter",
+	"asciiValue", "printString", "storeString", "radix:", "printStringBase:", "storeStringBase:",
+	"argOne", "argTwo", "ifTrue", "ifFalse", "switch", "at:", "put:", "timesRepeat",
+	"isLetter", "isDigit", "isAlphaNumeric", "isSeparator", "isVowel", "digitValue",
+	"asLowercase", "asUppercase", "asString", "max:", "min:", "isEmpty", "size", "copyFrom:",
+	"to", "indexOf:", "ifAbsent:", "occurrencesOf:", "conform:", "select:", "reject:", "collect:",
+	"detect:", "ifNone:", "inject:", "shuffled", "asArray", "asByteArray", "asWordArray",
+	"asOrderedCollection", "asSortedCollection", "asBag", "asSet", "SortedCollection",
+	"sortBlock:", "addFirst:", "removeFirst:", "addLast:", "removeLast:", "addAll:", "removeAll:",
+	"remove:", "isEmpty", "first", "last", "includes:", "Dictionary", "keyAtValue",
+	"removeKey:", "includesKey", "keys", "values", "value:", "keysDo", "associationsDo:", "keysAndValuesDo:",
+	"Smalltalk", "CMRGlobal", "CMRDictionary", "ReadStream", "peek", "contents", "atEnd",
+	"ReadWriteStream", "position", "nextLine", "FileStream", "newFileNamed", "oldFileNamed",
+	"close", "Date", "today", "dateAndTimeNow", "readFromString:", "newDay", "fromDays",
+	"dayOfWeek", "indexOfMonth", "daysInMonth", "daysInYear", "nameOfDay", "nameOfMonth",
+	"leapYear", "weekday", "previous", "dayOfMonth", "day", "firstDayOfMonth", "monthName",
+	"monthIndex", "daysInMonth", "year", "daysInYear", "daysLeftInYear", "asSeconds",
+	"addDays:", "subtractDays:", "subtractDate:", "printFormat:", "Time", "dateAndTimeNow",
+	"fromSeconds:", "millisecondClockValue", "totalSeconds", "seconds", "minutes", "hours",
+	"addTime:", "subtractTime", "millisecondsToRun:", "dotProduct:", "Rectangle", "Display",
+	"restoreAfter:", "fillWhite", "Pen", "squareNib", "color:", "home", "up", "down", "north",
+	"turn", "direction", "go", "location", "goto", "place:", "print", "extent", "withFont",
+	"width", "height", "perform:", "evaluate", "name", "category", "comment", "kindOfSubclass",
+	"definition", "instVarNames", "allInstVarNames", "classVarNames", "allClassVarNames",
+	"sharedPools", "allSharedPools", "selectors", "sourceCodeAt", "withAllSuperclasses",
+	"subclasses", "allSubclasses", "withAllSubclasses", "instSize", "isFixed", "isVariable",
+	"isPointers", "isBits", "isBytes", "isWords", "inspect", "browse", "confirm", "halt",
+	"notify", "error", "doesNotUnderstand", "shouldNotImplement", "subclassResponsibility",
+	"errorImproperStore", "errorNonIntegerIndex", "errorSubscriptBounds", "primitiveFailed",
+	"become", "FillInTheBlank", "whileTrue:", "whileFalse:", "timesRepeat:", "do:", "with:", "to:", "into:"
+]

@@ -1,2 +1,5 @@
-two@#
-thinh:
+| a b |
+a xor: b;
+(a doSmthng: #param) anotherPar: 'param2'.
+x := 16rABe-10. y := #( 1 2 [1 2 2r11])
+x == y
